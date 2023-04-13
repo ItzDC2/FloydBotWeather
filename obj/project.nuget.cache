@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "7jbcESUg5dAMNHFHMrAtSg1ru9U9eMce9gTycHElRierN5Npi4fBqJ/XdVwniTPYKOPIpKZcwPzA91EIGxQVUQ==",
+  "success": true,
+  "projectFilePath": "E:\\integracion-dam\\FloydBotWeather\\FloydBotWeather.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ItzDC2\\.nuget\\packages\\newtonsoft.json\\12.0.2\\newtonsoft.json.12.0.2.nupkg.sha512",
+    "C:\\Users\\ItzDC2\\.nuget\\packages\\telegram.bot\\18.0.0\\telegram.bot.18.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
