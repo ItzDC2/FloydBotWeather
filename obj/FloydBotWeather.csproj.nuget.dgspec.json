@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "E:\\integracion-dam\\FloydBotWeather\\FloydBotWeather.csproj": {}
+    "C:\\Users\\donov\\Desktop\\Repos\\FloydBotWeather\\FloydBotWeather.csproj": {}
   },
   "projects": {
-    "E:\\integracion-dam\\FloydBotWeather\\FloydBotWeather.csproj": {
+    "C:\\Users\\donov\\Desktop\\Repos\\FloydBotWeather\\FloydBotWeather.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\integracion-dam\\FloydBotWeather\\FloydBotWeather.csproj",
+        "projectUniqueName": "C:\\Users\\donov\\Desktop\\Repos\\FloydBotWeather\\FloydBotWeather.csproj",
         "projectName": "FloydBotWeather",
-        "projectPath": "E:\\integracion-dam\\FloydBotWeather\\FloydBotWeather.csproj",
-        "packagesPath": "C:\\Users\\ItzDC2\\.nuget\\packages\\",
-        "outputPath": "E:\\integracion-dam\\FloydBotWeather\\obj\\",
+        "projectPath": "C:\\Users\\donov\\Desktop\\Repos\\FloydBotWeather\\FloydBotWeather.csproj",
+        "packagesPath": "C:\\Users\\donov\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\donov\\Desktop\\Repos\\FloydBotWeather\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\ItzDC2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\donov\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -66,7 +66,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }

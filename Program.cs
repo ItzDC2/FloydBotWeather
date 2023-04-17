@@ -7,14 +7,22 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Newtonsoft.Json;
+using Telegram.Bot.Types.InputFiles;
+using System.Reflection;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace FloydBotWeather;
 
 class Program
 {
-    private static readonly string API_KEY = "05f7650ce0cd4981b71204408230704";
-    private static string url = $"http://api.weatherapi.com/v1/current.json?key={API_KEY}";
+    public static readonly string API_KEY = "589858ce33ff4dd2b6685857231404";
+    public static string BASE_URL = $"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q=";
     private static TelegramBotClient botClient;
+    private static bool respondiendo = false;
+    private static string? opcionSeleccionada = null;
+    private static readonly string CALL_FORMAT = "\nMe sería muy útil que me especificaras la ubicación de esta manera 👇\n" +
+        "Por ejemplo: San Cristóbal de La Laguna, Santa Cruz de Tenerife, Islas Canarias, junto al código del país, por ejemplo España (ES) 🥰";
+    private static InlineKeyboardMarkup keyboard;
 
     public static void Main(String[] args)
     {
@@ -27,6 +35,25 @@ class Program
         {
             AllowedUpdates = Array.Empty<UpdateType>()
         };
+
+        keyboard = new InlineKeyboardMarkup(new[]
+                     {
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Saber clima ⛅", "1"),
+                        InlineKeyboardButton.WithCallbackData("Saber latitud y longitud 📍", "2")
+                    },
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Saber país 🌍", "3"),
+                        InlineKeyboardButton.WithCallbackData("Saber hora de la región 🕐", "4")
+                    },
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Saber calidad del aire 🍃", "5")
+                    }
+
+                });
 
         botClient.StartReceiving(
             updateHandler: HandleUpdateAsync,
@@ -47,52 +74,118 @@ class Program
         // Si update.Message no es nulo, se almacena el resultado en la variable mensaje
 
         int cont = 0;
+        string respuesta = "";
 
-        if (update.Message is not { } mensaje)
-            return;
-        if (mensaje.Text is not { } mensajeText)
-            return;
-
-        var chatId = mensaje.Chat.Id;
-        Console.WriteLine($"Recibido '{mensajeText}' en el chat #{chatId}");
-
-        string respuesta;
-        if (mensajeText == "/start")
-            respuesta = $"Hola {mensaje.From.FirstName} soy Floyd y estoy aquí para ayudarte.\n" +
-                        $"Dime una zona y te diré qué tiempo hace ahí.\n" +
-                        $"Puedes usar el comando /floydzonelist para saber qué zonas son las que conozco :)";
-        else if (mensajeText.StartsWith("Hola"))
-            respuesta = $"¡Hola {mensaje.From.Username}!";
-        //Consultar zonas de la API
-        else if (mensajeText.Equals("/floydzonelist"))
+        if (update.CallbackQuery != null && update.Message is null)
         {
-            using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync(url);
-            var result = await response.Content.ReadAsStringAsync();
+            var chatId = update.CallbackQuery.Message.Chat.Id;
+            switch (update.CallbackQuery.Data)
+            {
+                //Saber clima
+                case "1":
+                    respuesta = $"Dime la ubicación de la que quieres saber el clima 🌤{CALL_FORMAT}";
+                    opcionSeleccionada = "1";
+                    respondiendo = true;
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    respuesta = "";
+                    break;
+                //Saber lat y long
+                case "2":
+                    respuesta = $"Dime la ubicación de la que quieres saber su latitud y longitud 📌{CALL_FORMAT}";
+                    opcionSeleccionada= "2";
+                    respondiendo = true;
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    respuesta = "";
+                    break;
+                //Saber país
+                case "3":
+                    respuesta = $"Dime la ubicación de la que quieres saber el país al que pertenece 📍{CALL_FORMAT}";
+                    opcionSeleccionada = "3";
+                    respondiendo = true;
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    respuesta = "";
+                    break;
+                //Saber hora
+                case "4":
+                    respuesta = $"Dime la ubicación de la que quieres saber la hora que hace allí 🕐{CALL_FORMAT}";
+                    opcionSeleccionada = "4";
+                    respondiendo = true;
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    respuesta = "";
+                    break;
+                //Saber calidad del aire
+                case "5":
+                    respuesta = $"Dime la ubicación de la quieres saber la calidad del aire 🌳{CALL_FORMAT}";
+                    opcionSeleccionada = "5";
+                    respondiendo = true;
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    respuesta = "";
+                    break;
+            }
+        } else {
+            var mensaje = update.Message;
+            var mensajeText = mensaje?.Text;
 
-            // Verifica si la respuesta es un objeto JSON válido
-            //if (result.StartsWith("{") && result.EndsWith("}"))
-            //{
-            //    respuesta = "Lo siento, no se pudo obtener la lista de ciudades.";
-            //}
-            //else
-            //{
-                List<Ciudad> ciudades = JsonConvert.DeserializeObject<List<Ciudad>>(result);
-                respuesta = "Estas son las posibles ciudades:\n";
+            var chatId = mensaje?.Chat.Id;
+            Console.WriteLine($"Recibido '{mensajeText}' en el chat #{chatId}");
 
-                foreach (Ciudad c in ciudades)
+            if (respondiendo)
+            {
+                switch (opcionSeleccionada)
                 {
-                    respuesta += $"{cont++}." + c.ToString() + "\n";
+                    //Saber clima
+                    case "1":
+                        respuesta = await ApiHandler.GetWeather(mensajeText, ct);
+                        opcionSeleccionada = null;
+                        respondiendo = false;
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
+                        respuesta = "";
+                        break;
+                    //Saber lat y long
+                    case "2":
+                        respuesta = await ApiHandler.GetLatitudAndLongitude(mensajeText, ct);
+                        opcionSeleccionada = null;
+                        respondiendo = false;
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
+                        respuesta = "";
+                        break;
+                    //Saber país
+                    case "3":
+                        break;
+                    //Saber hora
+                    case "4":
+                        break;
+                    //Saber calidad del aire
+                    case "5":
+                        break;
                 }
-            //}
-        }
-        else
-            respuesta = "Lo siento, no reconocí ese comando. Por favor, usa /start para iniciar o /help para ver la lista de comandos disponibles.";
+                respondiendo = false;
+                opcionSeleccionada = null;
+            } else {
+                if (mensajeText == "/start")
+                {
+                    var saludo = $"Hola {mensaje.From.FirstName} 😊, soy Floyd y estoy aquí para ayudarte 😎\n" +
+                                $"Dime una zona y te diré qué tiempo hace ahí ⛅\n" +
+                                $"Aunque no es sólo eso lo que puedo hacer 😁\n";
 
-        var enviarMensaje = await botClient.SendTextMessageAsync(
-            chatId: chatId,
-            text: respuesta,
-            cancellationToken: ct);
+                    await ApiHandler.EnviarMensaje($"{saludo}Aquí debajo te dejo las opciones disponibles 👇", botClient, chatId, keyboard, ct);
+                }
+                else if (mensajeText.Equals("/dox"))
+                {
+                    string videoPath = "FloydBotWeather.Resources.doxed.mp4";
+                    using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(videoPath))
+                    {
+                        var video = new InputOnlineFile(stream, videoPath);
+                        await botClient.SendVideoAsync(chatId, video, duration: 12, thumb: null, caption: ":)");
+                    }
+                    respuesta = "";
+                }
+            }
+
+            if (respuesta != "")
+                await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
+
+        }
 
     }
 
@@ -108,7 +201,5 @@ class Program
         return Task.CompletedTask;
 
     }
-
-
 
 }

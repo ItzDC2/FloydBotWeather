@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\doxed.mp4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\doxed.mp4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Telegram.Bot" Version="18.0.0" />
   </ItemGroup>
 
