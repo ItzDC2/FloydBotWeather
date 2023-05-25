@@ -1,5 +1,11 @@
 .vs/
 .vs/*
+.vscode
+.vscode/*
+bin
+bin/*
+obj
+obj/*
 .bin
 .bin/*
 .obj
