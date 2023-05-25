@@ -21,3 +21,4 @@ El bot ofrece las siguientes funcionalidades:<br/>
 
 ### Developer:
 1. Para ejecutar el bot usa ``dotnet run``
+
