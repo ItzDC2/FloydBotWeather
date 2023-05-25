@@ -34,8 +34,8 @@ class Program
             AllowedUpdates = Array.Empty<UpdateType>()
         };
 
-        keyboard = new InlineKeyboardMarkup(new[]
-                     {
+        keyboard = new InlineKeyboardMarkup(new []
+                    {
                     new []
                     {
                         InlineKeyboardButton.WithCallbackData("Saber clima ⛅", "1"),
@@ -50,11 +50,6 @@ class Program
                     {
                         InlineKeyboardButton.WithCallbackData("Saber calidad del aire 🍃", "5")
                     },
-                    new []
-                    {
-                        InlineKeyboradButton.WithCallbackData("Parar la conversación ❌")
-                    }
-
                 });
 
         botClient.StartReceiving(
@@ -123,9 +118,11 @@ class Program
                     respondiendo = true;
                     respuesta = "";
                     break;
-                case "5":
+                // Terminar conversación
+                case "6":
                     respuesta = $"¡Muchas gracias por haber usado FloydBotWeather!\nSi necesitas algo más, ¡no dudes en preguntar!";    
                     await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    break;
             }
         } else {
             var mensaje = update.Message;
