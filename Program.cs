@@ -51,6 +51,10 @@ class Program
                     new []
                     {
                         InlineKeyboardButton.WithCallbackData("Saber calidad del aire 🍃", "5")
+                    },
+                    new []
+                    {
+                        InlineKeyboradButton.WithCallbackData("Parar la conversación ❌")
                     }
 
                 });
@@ -84,9 +88,9 @@ class Program
                 //Saber clima
                 case "1":
                     respuesta = $"Dime la ubicación de la que quieres saber el clima 🌤{CALL_FORMAT}";
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     opcionSeleccionada = "1";
                     respondiendo = true;
-                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     respuesta = "";
                     break;
                 //Saber lat y long
@@ -100,27 +104,30 @@ class Program
                 //Saber país
                 case "3":
                     respuesta = $"Dime la ubicación de la que quieres saber el país al que pertenece 📍{CALL_FORMAT}";
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     opcionSeleccionada = "3";
                     respondiendo = true;
-                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     respuesta = "";
                     break;
                 //Saber hora
                 case "4":
                     respuesta = $"Dime la ubicación de la que quieres saber la hora que hace allí 🕐{CALL_FORMAT}";
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     opcionSeleccionada = "4";
                     respondiendo = true;
-                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     respuesta = "";
                     break;
                 //Saber calidad del aire
                 case "5":
                     respuesta = $"Dime la ubicación de la quieres saber la calidad del aire 🌳{CALL_FORMAT}";
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     opcionSeleccionada = "5";
                     respondiendo = true;
-                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     respuesta = "";
                     break;
+                case "5":
+                    respuesta = $"¡Muchas gracias por haber usado FloydBotWeather!\nSi necesitas algo más, ¡no dudes en preguntar!";    
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
             }
         } else {
             var mensaje = update.Message;
