@@ -1,12 +1,8 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Newtonsoft.Json;
 using Telegram.Bot.Types.InputFiles;
 using System.Reflection;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -16,13 +12,15 @@ namespace FloydBotWeather;
 class Program
 {
     public static readonly string API_KEY = "589858ce33ff4dd2b6685857231404";
-    public static string BASE_URL = $"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q=";
     private static TelegramBotClient botClient;
     private static bool respondiendo = false;
     private static string? opcionSeleccionada = null;
     private static readonly string CALL_FORMAT = "\nMe sería muy útil que me especificaras la ubicación de esta manera 👇\n" +
-        "Por ejemplo: San Cristóbal de La Laguna, Santa Cruz de Tenerife, Islas Canarias, junto al código del país, por ejemplo España (ES) 🥰";
+        "San Cristóbal de La Laguna, Islas Canarias, junto al código del país, por ejemplo España (ES) 📌";
     private static InlineKeyboardMarkup keyboard;
+
+    private static long ResponseChatId = 0;
+    private static List<long> ResponseChatIDs = new List<long>();
 
     public static void Main(String[] args)
     {
@@ -45,7 +43,7 @@ class Program
                     },
                     new []
                     {
-                        InlineKeyboardButton.WithCallbackData("Saber país 🌍", "3"),
+                        InlineKeyboardButton.WithCallbackData("Saber detalles del viento 🌀", "3"),
                         InlineKeyboardButton.WithCallbackData("Saber hora de la región 🕐", "4")
                     },
                     new []
@@ -59,10 +57,8 @@ class Program
             updateHandler: HandleUpdateAsync,
             pollingErrorHandler: HandlePollingErrorAsync,
             receiverOptions: receiverOptions,
-            cancellationToken: cts.Token);
-        
-        var me = botClient.GetMeAsync().Result;
-        Console.WriteLine($"Empezando a escuchar {me.Username}");
+            cancellationToken: cts.Token); 
+       
         Console.WriteLine("Pulsa ENTER para parar de escuchar...");
         Console.ReadLine();
         cts.Cancel();
@@ -79,6 +75,8 @@ class Program
         if (update.CallbackQuery != null && update.Message is null)
         {
             var chatId = update.CallbackQuery.Message.Chat.Id;
+            if (!ResponseChatIDs.Contains(chatId))
+                ResponseChatIDs.Add(chatId);
             switch (update.CallbackQuery.Data)
             {
                 //Saber clima
@@ -97,9 +95,9 @@ class Program
                     await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     respuesta = "";
                     break;
-                //Saber país
+                //Saber velocidad del viento
                 case "3":
-                    respuesta = $"Dime la ubicación de la que quieres saber el país al que pertenece 📍{CALL_FORMAT}";
+                    respuesta = $"Dime la ubicación de la que quieres detalles del viento allí 🌬{CALL_FORMAT}";
                     opcionSeleccionada = "3";
                     respondiendo = true;
                     await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
@@ -126,37 +124,56 @@ class Program
             var mensaje = update.Message;
             var mensajeText = mensaje?.Text;
 
-            var chatId = mensaje?.Chat.Id;
+            if (mensaje == null || mensajeText == null || mensajeText.Length == 0 || mensajeText == null)
+                return;
+
+            var chatId = mensaje.Chat.Id;
             Console.WriteLine($"Recibido '{mensajeText}' en el chat #{chatId}");
 
-            if (respondiendo)
+            if (respondiendo && ResponseChatIDs.Contains(chatId))
             {
+                ResponseChatIDs.Remove(chatId);
                 switch (opcionSeleccionada)
                 {
                     //Saber clima
                     case "1":
                         respuesta = await ApiHandler.GetWeather(mensajeText, ct);
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
                         opcionSeleccionada = null;
                         respondiendo = false;
-                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
                         respuesta = "";
                         break;
                     //Saber lat y long
                     case "2":
                         respuesta = await ApiHandler.GetLatitudAndLongitude(mensajeText, ct);
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
                         opcionSeleccionada = null;
                         respondiendo = false;
-                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
                         respuesta = "";
                         break;
-                    //Saber país
+                    //Saber información del viento
                     case "3":
+                        respuesta = await ApiHandler.GetWindDetails(mensajeText, ct);
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
+                        opcionSeleccionada = null;
+                        respondiendo = false;
+                        respuesta = "";
                         break;
                     //Saber hora
                     case "4":
+                        respuesta = await ApiHandler.GetTime(mensajeText, ct);
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
+                        opcionSeleccionada = null;
+                        respondiendo = false;
+                        respuesta = "";
                         break;
                     //Saber calidad del aire
                     case "5":
+                        respuesta = await ApiHandler.GetAirQuality(mensajeText, ct);
+                        await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, keyboard, ct);
+                        opcionSeleccionada = null;
+                        respondiendo = false;
+                        respuesta = "";
                         break;
                 }
                 respondiendo = false;
@@ -165,8 +182,7 @@ class Program
                 if (mensajeText == "/start")
                 {
                     var saludo = $"Hola {mensaje.From.FirstName} 😊, soy Floyd y estoy aquí para ayudarte 😎\n" +
-                                $"Dime una zona y te diré qué tiempo hace ahí ⛅\n" +
-                                $"Aunque no es sólo eso lo que puedo hacer 😁\n";
+                                $"Elige lo que quieras que haga y con gusto lo haré 😁\n";
 
                     await ApiHandler.EnviarMensaje($"{saludo}Aquí debajo te dejo las opciones disponibles 👇", botClient, chatId, keyboard, ct);
                 }
@@ -178,6 +194,11 @@ class Program
                         var video = new InputOnlineFile(stream, videoPath);
                         await botClient.SendVideoAsync(chatId, video, duration: 12, thumb: null, caption: ":)");
                     }
+                    respuesta = "";
+                }
+                else
+                {
+                    await ApiHandler.EnviarMensaje($"No te he entendido, por favor, elige una de las opciones de aquí abajo 👇", botClient, chatId, keyboard, ct);
                     respuesta = "";
                 }
             }
