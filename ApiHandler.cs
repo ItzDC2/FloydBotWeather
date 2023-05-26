@@ -52,7 +52,7 @@ class ApiHandler
                         Console.WriteLine($"Buscado {zone}:\n * País: {data.location.country}\n * Región: {data.location.region}\n" +
                             $" * Nombre: {data.location.name}\n * Código: {data.location.tz_id}");
                     }
-
+                    response = $"No se ha podido encontrar información del tiempo para {zone}. Por favor, asegúrate de escribir bien el nombre de la ciudad.";
                 }
             }
             catch (HttpRequestException ex)
@@ -77,10 +77,11 @@ class ApiHandler
                     dynamic data = JsonConvert.DeserializeObject<dynamic>(responseString);
                     double lat = data.location.lat;
                     double lon = data.location.lon;
-                    response = $"Las coordenadas de {zone} son:\n* Latitud: {lat}º\n* Longitud: {lon}º" +
+                    response = $"Las coordenadas de {zone} son:\n* Latitud: {lat.ToString("0.000")}º\n* Longitud: {lon.ToString("0.000")}\n* Coordenadas: ({lat.ToString("0.000").Replace(',','.')}" +
+                            $", {lon.ToString("0.000").Replace(',','.')})" +
                         $"{DESPEDIDA}";
                     Console.WriteLine($"Buscado {zone}:\n * País: {data.location.country}\n * Región: {data.location.region}\n" +
-                            $" * Nombre: {data.location.name}\n * Código: {data.location.tz_id}");
+                            $" * Nombre: {data.location.name}\n * Código: {data.location.tz_id}\n");
                 }
                 else
                     response = $"No se ha podido encontrar información de la zona {zone}, ¿Has escrito bien su nombre?";

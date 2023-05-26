@@ -19,7 +19,7 @@ class Program
     private static readonly string CALL_FORMAT = "\nMe sería muy útil que me especificaras la ubicación de esta manera 👇\n" +
         "San Cristóbal de La Laguna, Islas Canarias, junto al código del país, por ejemplo España (ES) 📌";
     private static InlineKeyboardMarkup keyboard;
-    private static ReplyKeyboardMarkup startButton = new(new[]
+    private static readonly ReplyKeyboardMarkup startButton = new(new[]
     {
         new KeyboardButton[] { "/start" },
     })
