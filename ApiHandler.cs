@@ -26,6 +26,7 @@ class ApiHandler
                     cancellationToken: ct
                 );
         }
+
         public static async Task<string> GetWeather(string zone, CancellationToken ct)
         {
             var url = $"{BASE_URL}&q={zone}&lang=es";

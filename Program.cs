@@ -14,10 +14,18 @@ class Program
     public static readonly string API_KEY = "589858ce33ff4dd2b6685857231404";
     private static TelegramBotClient botClient;
     private static bool respondiendo = false;
+    private static bool primeraVez = true;
     private static string? opcionSeleccionada = null;
     private static readonly string CALL_FORMAT = "\nMe sería muy útil que me especificaras la ubicación de esta manera 👇\n" +
         "San Cristóbal de La Laguna, Islas Canarias, junto al código del país, por ejemplo España (ES) 📌";
     private static InlineKeyboardMarkup keyboard;
+    private static ReplyKeyboardMarkup startButton = new(new[]
+    {
+        new KeyboardButton[] { "/start" },
+    })
+    {
+        ResizeKeyboard = true
+    };
 
     private static long ResponseChatId = 0;
     private static List<long> ResponseChatIDs = new List<long>();
@@ -50,6 +58,10 @@ class Program
                     {
                         InlineKeyboardButton.WithCallbackData("Saber calidad del aire 🍃", "5")
                     },
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Parar la conversación ❌", "6")
+                    }
                 });
 
         botClient.StartReceiving(
@@ -74,8 +86,11 @@ class Program
         if (update.CallbackQuery != null && update.Message is null)
         {
             var chatId = update.CallbackQuery.Message.Chat.Id;
+            primeraVez = false;
+
             if (!ResponseChatIDs.Contains(chatId))
                 ResponseChatIDs.Add(chatId);
+
             switch (update.CallbackQuery.Data)
             {
                 //Saber clima
@@ -96,7 +111,7 @@ class Program
                     break;
                 //Saber velocidad del viento
                 case "3":
-                    respuesta = $"Dime la ubicación de la que quieres detalles del viento allí 🌬{CALL_FORMAT}";
+                    respuesta = $"Dime la ubicación de la que quieres detalles del viento 🌬{CALL_FORMAT}";
                     await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
                     opcionSeleccionada = "3";
                     respondiendo = true;
@@ -121,7 +136,7 @@ class Program
                 // Terminar conversación
                 case "6":
                     respuesta = $"¡Muchas gracias por haber usado FloydBotWeather!\nSi necesitas algo más, ¡no dudes en preguntar!";    
-                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, null, ct);
+                    await ApiHandler.EnviarMensaje(respuesta, botClient, chatId, startButton, ct);
                     break;
             }
         } else {
@@ -137,6 +152,7 @@ class Program
             if (respondiendo && ResponseChatIDs.Contains(chatId))
             {
                 ResponseChatIDs.Remove(chatId);
+                primeraVez = false;
                 switch (opcionSeleccionada)
                 {
                     //Saber clima
@@ -189,6 +205,10 @@ class Program
                                 $"Elige lo que quieras que haga y con gusto lo haré 😁\n";
 
                     await ApiHandler.EnviarMensaje($"{saludo}Aquí debajo te dejo las opciones disponibles 👇", botClient, chatId, keyboard, ct);
+
+                    if(!primeraVez)
+                        await ApiHandler.EnviarMensaje("Eliminando teclado...", botClient, chatId, new ReplyKeyboardRemove(), ct);
+
                 }
                 else if (mensajeText.Equals("/dox"))
                 {
